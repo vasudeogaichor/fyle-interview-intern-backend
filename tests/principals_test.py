@@ -138,4 +138,19 @@ def test_invalid_apis(client, h_principal):
     data = response.json
 
     assert data['error'] == 'NotFound'
-    
+
+def test_invalid_header(client, h_principal):
+    """
+    failure case: API endpoints should detect unauthorized requests
+    """
+    h_principal['X-Principals'] = h_principal['X-Principal']
+    del h_principal['X-Principal']
+
+    response = client.get(
+        'principal/teachers',
+        headers=h_principal
+    )
+    assert response.status_code == 401
+    data = response.json
+    assert data['error'] == 'FyleError'
+    assert data['message'] == 'principal not found'
